@@ -8,7 +8,6 @@ export default function AllRoutes() {
     <Routes>
       <Route path='/' element={<Home></Home>} />
       <Route path='/editor/id' element={<Editor></Editor>} />
-
     </Routes>
   )
 }
