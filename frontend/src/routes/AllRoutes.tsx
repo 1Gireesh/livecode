@@ -7,7 +7,7 @@ export default function AllRoutes() {
   return (
     <Routes>
       <Route path='/' element={<Home></Home>} />
-      <Route path='/editor/id' element={<Editor></Editor>} />
+      <Route path='/editor/:id' element={<Editor></Editor>} />
     </Routes>
   )
 }
