@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { initSocket } from '../socket';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Socket } from 'socket.io-client';
+import Edit from '../components/Edit';
 
 type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string }> }
 
@@ -35,6 +36,14 @@ export default function Editor() {
             alert(uname + " joined");
           }
         }))
+
+      socketRef.current.on("disconnected", ({ uname }: { uname: string }) => {
+        alert(uname + " disconnected");
+        setClient((clients) => clients.filter((client) => client.username !== uname));
+      })
+
+
+
     })();
 
   }, []);
@@ -48,7 +57,7 @@ export default function Editor() {
           clients?.map((e, i) => <h2 key={i}>{e.username}</h2>)
         }
       </div>
-
+      <Edit></Edit>
     </div>
   )
 }
