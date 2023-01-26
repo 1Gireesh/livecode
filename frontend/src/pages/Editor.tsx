@@ -5,15 +5,16 @@ import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Socket } from 'socket.io-client';
 import Edit from '../components/Edit';
 import "../style/editor.css"
+import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 
 
 type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
 
 export default function Editor() {
-
-  
-
-  let [h, seth] = useState("0");
+  let [h, seth] = useState("5vh");
+  const [theme, settheme]=useState("material")
+  const [res, setres] = useState<{res:string,fl:boolean}>()
 
 
   let location = useLocation();
@@ -46,12 +47,16 @@ export default function Editor() {
           setClient(clients);
           setCode(code);
           if (username !== uname) {
-            alert(uname + " joined");
+            toast((uname + " joined"),{
+              icon:"😉"
+            });
           }
         }))
 
       socketRef.current.on("disconnected", ({ uname }: { uname: string }) => {
-        alert(uname + " disconnected");
+        toast((uname + " disconnected"),{
+          icon:"☹️"
+        });
         setClient((clients) => clients.filter((client) => client.username !== uname));
       })
 
@@ -66,13 +71,25 @@ export default function Editor() {
     })();
   }, []);
 
+  function copyidbtn() {
+    navigator.clipboard.writeText(id);
+  }
+
   useEffect(() => {
     if (code !== `@`) socketRef.current?.emit("type", { id, username, code });
   }, [code])
 
+  function getresult() {
+    seth("200px")
+    axios.post("http://localhost:8080/run",{code})
+    .then((e)=>setres(e.data))
+    .catch((e)=>setres({res:"Server is too busy",fl:false}))
+  }
+
 
   return (
     <div className="editorPage">
+      <Toaster position="top-right"/>
       <div className="avatarPage">
         <div id="editorlogo">
           <h1>LIVECODE</h1>
@@ -81,7 +98,7 @@ export default function Editor() {
 
 
         <div className="editorUsers">
-        
+
 
           {
             clients?.map((e, i) => (
@@ -105,7 +122,7 @@ export default function Editor() {
 
         </div>
         <div className="editorfooter">
-          <button className="button-89">Copy ID</button>
+          <button className="button-89" onClick={() => copyidbtn()}>Copy ID</button>
           <button className="leavebtn">Leave</button>
         </div>
       </div>
@@ -120,15 +137,15 @@ export default function Editor() {
           </div>
           <div>
             <label htmlFor="theme">Theme</label>
-            <select name="" id="theme">
+            <select name="" id="theme" onChange={(e)=>settheme(e.target.value)}>
               <option value="material">Material</option>
-              <option value="drakula">Drakula</option>
+              <option value="dracula">Dracula</option>
             </select>
           </div>
-          <button className="button-87" onClick={() => seth("200px")} >Run</button>
+          <button className="button-87" onClick={() => getresult()} >Run</button>
         </div>
         <div>
-          {<Edit readonly={readOnly} code={code} setCode={setCode} />}
+          {<Edit readonly={readOnly} code={code} setCode={setCode} theme={theme}/>}
         </div>
         <div className="resultbox"
           style={{ height: h }}
@@ -137,7 +154,7 @@ export default function Editor() {
             <p>Result</p>
             <p style={{ cursor: "pointer" }} onClick={() => seth("30px")}>X</p>
           </div>
-          <p className="result"></p>
+          <p className="result" style={{color:res?.fl?"rgb(0, 250, 0)":"rgb(255, 77, 77)"}}>{res?.res}</p>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/python/python";
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
 import 'codemirror/theme/material.css';
@@ -11,11 +12,12 @@ import 'codemirror/addon/edit/closebrackets';
 
 
 
-export default function Edit({ code, setCode, readonly }:
+export default function Edit({ code, setCode, readonly,theme }:
     {
         readonly: boolean,
         code: string,
-        setCode: React.Dispatch<React.SetStateAction<string>>
+        setCode: React.Dispatch<React.SetStateAction<string>>,
+        theme:string
     }) {
 
 
@@ -25,7 +27,7 @@ export default function Edit({ code, setCode, readonly }:
         lineNumbers: true,
         matchBrackets: true,
         mode: 'javascript',
-        theme: 'material',
+        theme: theme,
         autoScroll: true,
         readOnly: readonly,
     };

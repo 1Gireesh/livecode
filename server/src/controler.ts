@@ -53,7 +53,7 @@ function readOnly(data: {
     userId: string, readonly: boolean
 },
     socket: Socket, io: Server) {
-    io.to(data.userId).emit("dontwrite", readOnly);
+    console.log(data)
 }
 
 
