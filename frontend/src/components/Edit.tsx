@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import "codemirror/mode/javascript/javascript";
 import 'codemirror/lib/codemirror.css';
@@ -7,22 +7,24 @@ import 'codemirror/theme/material.css';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 
-const options = {
-    lineNumbers: true,
-    matchBrackets: true,
-    mode: 'javascript',
-    theme: 'material',
-    autoScroll: true,
-    autoCursor: true,
-    indentUnit: 4,
-    smartIndent: true,
-    // readOnly: true
-    matchingbracket: true
-};
-export default function Edit() {
+
+export default function Edit({ code, setCode, readonly }:
+    {
+        readonly: boolean,
+        code: string,
+        setCode: React.Dispatch<React.SetStateAction<string>>
+    }) {
 
 
-    let [val, setVal] = useState("");
+
+    const options = {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: 'javascript',
+        theme: 'material',
+        autoScroll: true,
+        readOnly: readonly,
+    };
 
     useEffect(() => {
 
@@ -39,9 +41,9 @@ export default function Edit() {
     return (
         <CodeMirror
             className='edit'
-            value={val}
+            value={code}
             options={options}
-            onBeforeChange={(editor, data, code) => { setVal(code) }}
+            onBeforeChange={(editor, data, code) => { setCode(code) }}
         />
     )
 }
