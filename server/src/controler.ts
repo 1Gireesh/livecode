@@ -1,10 +1,12 @@
 import { Server, Socket } from "socket.io";
 
-const userIdNameMap: { [key: string]: string } = {}
+const userIdNameMap: { [key: string]: string } = {};
+const userIdRoomMap: { [key: string]: string } = {};
 
 function join(data: { id: string, username: string }, socket: Socket, io: Server) {
     userIdNameMap[socket.id] = data.username;
     socket.join(data.id);
+    userIdRoomMap[socket.id] = data.id;
     let clients = Array
         .from(io.sockets.adapter.rooms.get(data.id) || [])
         .map((socketId, i) => ({ socketId, username: userIdNameMap[socketId] }))
@@ -16,9 +18,10 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
 function leave(socket: Socket, io: Server) {
     const rooms = Array.from(socket.rooms);
     rooms.forEach((roomId) => {
-        socket.in(roomId).emit("disconnected", { id: socket.id, username: userIdNameMap[socket.id] });
+        socket.in(roomId).emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
     })
     delete userIdNameMap[socket.id];
+    socket.leave(userIdRoomMap[socket.id]);
 }
 
 
