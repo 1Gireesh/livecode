@@ -9,11 +9,20 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
     userIdNameMap[socket.id] = data.username;
     socket.join(data.id);
     userIdRoomMap[socket.id] = data.id;
+    if (!roomAdminMap[data.id]) {
+        roomAdminMap[data.id] = data.username;
+    }
     let clients = Array
         .from(io.sockets.adapter.rooms.get(data.id) || [])
-        .map((socketId, i) => ({ socketId, username: userIdNameMap[socketId] }))
+        .map((socketId, i) => ({
+            socketId,
+            username: userIdNameMap[socketId],
+            admin: roomAdminMap[data.id]
+        }))
 
-    if (clients.length === 1) roomAdminMap[data.id] = socket.id;
+    console.log(roomAdminMap, data.id);
+
+
 
     socket.emit("prevcode", roomCodeMap[data.id]);
 
@@ -35,13 +44,13 @@ function leave(socket: Socket, io: Server) {
 
 function type(data: { id: string, username: string, code: string }, socket: Socket, io: Server) {
     roomCodeMap[data.id] = data.code;
-    console.log(data.code)
     Array.from(io.sockets.adapter.rooms.get(data.id) || [])
         .forEach((socket) => io.to(socket).emit("typed", data.code));
 }
 
 function readOnly(data: {
-    roomId: string, adminId: string, userId: string, readonly: boolean
+    roomId: string, adminId: string,
+    userId: string, readonly: boolean
 },
     socket: Socket, io: Server) {
     io.to(data.userId).emit("dontwrite", readOnly);

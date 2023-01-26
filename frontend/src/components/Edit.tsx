@@ -1,6 +1,5 @@
 
 
-import React, { useEffect, useRef, useState } from 'react';
 
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import "codemirror/mode/javascript/javascript";

@@ -7,35 +7,39 @@ import Edit from '../components/Edit';
 import "../style/editor.css"
 
 
-type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string }>, code: string }
+type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
 
 export default function Editor() {
+
+  
 
   let [h, seth] = useState("0");
 
 
   let location = useLocation();
   let { username = "chupaRustam", id = "dsfajkfdsh" } = location.state;
-  console.log(username, id);
 
   let socketRef = useRef<(Socket<DefaultEventsMap, DefaultEventsMap>) | null>(null);
 
   function readonly(userId: string, write: boolean) {
     let admin = clients.find((client) => client.username === username)
-    socketRef.current?.emit("readonly", { roomId: id, adminId: admin?.id, userId })
+    socketRef.current?.emit("readonly", {
+      roomId: id, adminId: admin?.id,
+      userId, readonly: write
+    })
   }
 
   let [readOnly, setRead] = useState(false);
-  const [clients, setClient] = useState<Array<{ username: string, id: string }>>([]);
+  const [clients, setClient] = useState<Array<{ username: string, id: string, admin: string }>>([]);
   const [code, setCode] = useState(`@`);
 
+  console.log(clients)
 
   useEffect(() => {
 
     (async () => {
       socketRef.current = await initSocket();
-      socketRef.current.on("connect_error", (e) => { alert(e); })
-      socketRef.current.on("connect_failed", (e) => { alert(e); })
+      // socketRef.current.on("connect_failed", (e) => { alert(e); })
       socketRef.current.emit("join", { id, username });
       socketRef.current
         .on("joined", (({ socketId, username: uname, clients, code }: joined) => {
@@ -73,27 +77,32 @@ export default function Editor() {
         <div id="editorlogo">
           <h1>LIVECODE</h1>
         </div>
+
+
+
         <div className="editorUsers">
-          <div className="user">
-            <img alt="" src="https://i.ibb.co/M2Gd2pD/icons8-cat-profile-100.png" />
-            <div>
-              <p>Gireesh</p>
-              <div>
-                <p>Admin</p>
-                <img alt="" src="https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png" />
+        
+
+          {
+            clients?.map((e, i) => (
+              <div className="user" key={i}>
+                {/* https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png */}
+                <img alt="a" src="https://i.ibb.co/M2Gd2pD/icons8-cat-profile-100.png" />
+                <div>
+                  <p>{e.username}</p>
+                  <div>
+                    <p>{e.admin === e.username ? "Admin" : "User"}</p>
+                    <img alt="a" src="https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png"
+                      onClick={() => readonly(e.id, true)}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="user">
-            <img alt="" src="https://i.ibb.co/M2Gd2pD/icons8-cat-profile-100.png" />
-            <div>
-              <p>Gireesh</p>
-              <div>
-                <p>User</p>
-                <img alt="" src="https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png" />
-              </div>
-            </div>
-          </div>
+            ))
+          }
+
+
+
         </div>
         <div className="editorfooter">
           <button className="button-89">Copy ID</button>
@@ -102,7 +111,7 @@ export default function Editor() {
       </div>
       <div className="editorbody">
         <div className="editorbody_top">
-          <p>Room Id: BABU_BHAIYA</p>
+          <p>Room Id: {id}</p>
           <div>
             <label htmlFor="language">Language</label>
             <select name="language" id="language">
