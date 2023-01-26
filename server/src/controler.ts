@@ -1,5 +1,4 @@
-import { Server, Socket } from "socket.io";
-
+import { Socket, Server } from "socket.io";
 const userIdNameMap: { [key: string]: string } = {};
 const userIdRoomMap: { [key: string]: string } = {};
 const roomCodeMap: { [key: string]: string } = {};
@@ -53,7 +52,7 @@ let sc = 0;
 
 export function controler(io: Server) {
 
-    io.on("connection", (socket) => {
+    io.on("connection", (socket: Socket) => {
         console.log("socket connected", ++sc, socket.id);
         socket.on("join", (data) => join(data, socket, io));
         socket.on("disconnecting", () => leave(socket, io));

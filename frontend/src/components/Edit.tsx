@@ -1,4 +1,7 @@
-import React, { useEffect } from 'react';
+
+
+import React, { useEffect, useRef, useState } from 'react';
+
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import "codemirror/mode/javascript/javascript";
 import 'codemirror/lib/codemirror.css';
@@ -8,12 +11,14 @@ import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 
 
+
 export default function Edit({ code, setCode, readonly }:
     {
         readonly: boolean,
         code: string,
         setCode: React.Dispatch<React.SetStateAction<string>>
     }) {
+
 
 
 
@@ -26,21 +31,11 @@ export default function Edit({ code, setCode, readonly }:
         readOnly: readonly,
     };
 
-    useEffect(() => {
-
-        (async () => {
-
-
-        })();
-
-
-    }, [])
-
 
 
     return (
         <CodeMirror
-            className='edit'
+            className='CodeMirror'
             value={code}
             options={options}
             onBeforeChange={(editor, data, code) => { setCode(code) }}
