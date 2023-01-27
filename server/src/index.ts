@@ -9,17 +9,14 @@ import cors from "cors"
 
 const server = http.createServer(app);
 
-app.use(cors())
+app.use(cors({ origin: "*" }))
 app.use(express.json())
 
-// app.use((req, res, next) => {
-//     res.sendFile(path.join(__dirname, 'build', 'index.html'));
-// });
 let c = 0;
 app.get("/", (req, res) => { res.send("works") });
-app.use("/run",coderunner)
+app.use("/run", coderunner)
 
-const io = new Server(server);
+const io = new Server(server,{});
 
 controler(io);
 
