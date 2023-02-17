@@ -10,6 +10,16 @@ import 'codemirror/theme/material.css';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 
+let id:ReturnType<typeof setTimeout>;
+
+// function debounce(func:Function, delay:number) {
+//     clearTimeout(id)
+//     id=setTimeout(()=>{
+//         func()
+//     },delay)
+// }
+
+
 
 
 export default function Edit({ code, setCode, readonly,theme }:
@@ -39,7 +49,9 @@ export default function Edit({ code, setCode, readonly,theme }:
             className='CodeMirror'
             value={code}
             options={options}
-            onBeforeChange={(editor, data, code) => { setCode(code) }}
+            onBeforeChange={(editor, data, code) => {id=setTimeout(() => {
+                setCode(code)
+            }, 100);}}
         />
     )
 }
