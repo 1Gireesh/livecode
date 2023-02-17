@@ -1,57 +1,40 @@
+import { useEffect } from "react"
 
 
 
-import { Controlled as CodeMirror } from 'react-codemirror2'
-import "codemirror/mode/javascript/javascript";
-import "codemirror/mode/python/python";
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/dracula.css';
-import 'codemirror/theme/material.css';
-import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/edit/closebrackets';
-
-let id:ReturnType<typeof setTimeout>;
-
-// function debounce(func:Function, delay:number) {
-//     clearTimeout(id)
-//     id=setTimeout(()=>{
-//         func()
-//     },delay)
-// }
+const arr = ["let", "var", "break", "function", "class", "const"]
+const arr2 = ["for", "log", "break", "while", "if", "else"]
+const arr3 = ["true", "false", "null", "undefined"]
 
 
-
-
-export default function Edit({ code, setCode, readonly,theme }:
+export default function Edit({ code, setCode }:
     {
         readonly: boolean,
         code: string,
         setCode: React.Dispatch<React.SetStateAction<string>>,
-        theme:string
+        theme: string
     }) {
 
 
 
-
-    const options = {
-        lineNumbers: true,
-        matchBrackets: true,
-        mode: 'javascript',
-        theme: theme,
-        autoScroll: true,
-        readOnly: readonly,
-    };
-
-
-
     return (
-        <CodeMirror
-            className='CodeMirror'
-            value={code}
-            options={options}
-            onBeforeChange={(editor, data, code) => {id=setTimeout(() => {
-                setCode(code)
-            }, 100);}}
-        />
+        <div className='code'>
+            <textarea name="" id="" cols={30} rows={30}
+                value={code || ""}
+                onChange={(e) => {
+                    setCode(e.target.value)
+                }}
+
+            ></textarea>
+
+            <div>
+                {
+                    code
+                }
+            </div>
+
+
+
+        </div>
     )
 }

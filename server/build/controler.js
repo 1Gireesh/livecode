@@ -37,13 +37,14 @@ function leave(socket, io) {
 function type(data, socket, io) {
     roomCodeMap[data.id] = data.code;
     Array.from(io.sockets.adapter.rooms.get(data.id) || [])
-        .forEach((socket) => io.to(socket).emit("typed", data.code));
+        .forEach((socket) => io.to(socket).emit("typed", Object.assign({}, data)));
 }
 function readOnly(data, socket, io) {
 }
 function clear(id, socket, io) {
     Array.from(io.sockets.adapter.rooms.get(id) || [])
         .forEach((socket) => io.to(socket).emit("typed", ""));
+    console.log(id, roomCodeMap[id]);
     roomCodeMap[id] = "";
 }
 let sc = 0;

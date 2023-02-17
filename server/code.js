@@ -1,2 +1,1 @@
-console.log("gir")
-console.log("gir2")
+console.log("ho")

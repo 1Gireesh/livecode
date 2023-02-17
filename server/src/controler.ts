@@ -42,7 +42,7 @@ function leave(socket: Socket, io: Server) {
 function type(data: { id: string, username: string, code: string }, socket: Socket, io: Server) {
     roomCodeMap[data.id] = data.code;
     Array.from(io.sockets.adapter.rooms.get(data.id) || [])
-        .forEach((socket) => io.to(socket).emit("typed", data.code));
+        .forEach((socket) => io.to(socket).emit("typed", { ...data }));
 }
 
 function readOnly(data: {
@@ -55,6 +55,7 @@ function readOnly(data: {
 function clear(id: string, socket: Socket, io: Server) {
     Array.from(io.sockets.adapter.rooms.get(id) || [])
         .forEach((socket) => io.to(socket).emit("typed", ""));
+    console.log(id, roomCodeMap[id]);
     roomCodeMap[id] = "";
 }
 

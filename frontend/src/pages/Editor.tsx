@@ -13,8 +13,8 @@ type joined = { socketId: string, username: string, clients: Array<{ username: s
 
 export default function Editor() {
   let [h, seth] = useState("5vh");
-  const [theme, settheme]=useState("material")
-  const [res, setres] = useState<{res:[string],fl:boolean}>()
+  const [theme, settheme] = useState("material")
+  const [res, setres] = useState<{ res: [string], fl: boolean }>()
 
 
   let location = useLocation();
@@ -47,26 +47,27 @@ export default function Editor() {
           setClient(clients);
           setCode(code);
           if (username !== uname) {
-            toast((uname + " joined"),{
-              icon:"😉"
+            toast((uname + " joined"), {
+              icon: "😉"
             });
           }
         }))
 
       socketRef.current.on("disconnected", ({ uname }: { uname: string }) => {
-        toast((uname + " disconnected"),{
-          icon:"☹️"
+        toast((uname + " disconnected"), {
+          icon: "☹️"
         });
         setClient((clients) => clients.filter((client) => client.username !== uname));
       })
 
       socketRef.current.on("dontwrite", (readOnly: boolean) => { setRead(readOnly) });
 
-
-
-
       socketRef.current.on("prevcode", (code) => setCode(code));
-      socketRef.current.on("typed", (code) => setCode(code));
+      socketRef.current.on("typed", ({ code, uname }) => {
+        console.log(username,code)
+          if (username !== uname)
+            setCode(code);
+      });
 
     })();
   }, []);
@@ -77,25 +78,29 @@ export default function Editor() {
 
   useEffect(() => {
     if (code !== `@`) socketRef.current?.emit("type", { id, username, code });
+    console.log(code)
   }, [code])
 
   function getresult() {
     seth("200px")
-    axios.post("http://localhost:8080/run",{code})
-    .then((e:AxiosResponse)=>setres({res:(e.data.res.split("\n")), fl:e.data.fl}))
-    .catch(()=>setres({res:["Server is too busy"],fl:false}))
+    axios.post("http://localhost:8080/run", { code })
+      .then((e: AxiosResponse) => setres({ res: (e.data.res.split("\n")), fl: e.data.fl }))
+      .catch(() => setres({ res: ["Server is too busy"], fl: false }))
   }
-  console.log(res)
 
   return (
     <div className="editorPage">
-      <Toaster position="top-right"/>
+      <Toaster position="top-right" />
       <div className="avatarPage">
         <div id="editorlogo">
           <h1>LIVECODE</h1>
         </div>
 
-
+        <button className='btn btn-3'
+          onClick={() => {
+            socketRef.current?.emit("clear", id)
+          }}
+        >clear</button>
 
         <div className="editorUsers">
 
@@ -137,7 +142,7 @@ export default function Editor() {
           </div>
           <div>
             <label htmlFor="theme">Theme</label>
-            <select name="" id="theme" onChange={(e)=>settheme(e.target.value)}>
+            <select name="" id="theme" onChange={(e) => settheme(e.target.value)}>
               <option value="material">Material</option>
               <option value="dracula">Dracula</option>
             </select>
@@ -145,7 +150,7 @@ export default function Editor() {
           <button className="button-87" onClick={() => getresult()} >Run</button>
         </div>
         <div>
-          {<Edit readonly={readOnly} code={code} setCode={setCode} theme={theme}/>}
+          {<Edit readonly={readOnly} code={code} setCode={setCode} theme={theme} />}
         </div>
         <div className="resultbox"
           style={{ height: h }}
@@ -155,10 +160,10 @@ export default function Editor() {
             <p style={{ cursor: "pointer" }} onClick={() => seth("30px")}>X</p>
           </div>
           <div className="result">
-            <p style={{color:"white"}}>{">_Console/~"}</p>
+            <p style={{ color: "white" }}>{">_Console/~"}</p>
             {
-              res?.res.map((el,i)=>(
-                <p style={{color:res?.fl?"rgb(0, 250, 0)":"rgb(255, 77, 77)"}} key={i}>{i+1}. {el}</p>
+              res?.res.map((el, i) => (
+                <p style={{ color: res?.fl ? "rgb(0, 250, 0)" : "rgb(255, 77, 77)" }} key={i}>{i + 1}. {el}</p>
               ))
             }
           </div>
