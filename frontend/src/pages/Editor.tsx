@@ -6,7 +6,7 @@ import { Socket } from 'socket.io-client';
 import Edit from '../components/Edit';
 import "../style/editor.css"
 import toast, { Toaster } from 'react-hot-toast';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 
 type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
@@ -14,7 +14,7 @@ type joined = { socketId: string, username: string, clients: Array<{ username: s
 export default function Editor() {
   let [h, seth] = useState("5vh");
   const [theme, settheme]=useState("material")
-  const [res, setres] = useState<{res:string,fl:boolean}>()
+  const [res, setres] = useState<{res:[string],fl:boolean}>()
 
 
   let location = useLocation();
@@ -34,7 +34,7 @@ export default function Editor() {
   const [clients, setClient] = useState<Array<{ username: string, id: string, admin: string }>>([]);
   const [code, setCode] = useState(`@`);
 
-  console.log(clients)
+  // console.log(clients)
 
   useEffect(() => {
 
@@ -82,10 +82,10 @@ export default function Editor() {
   function getresult() {
     seth("200px")
     axios.post("http://localhost:8080/run",{code})
-    .then((e)=>setres(e.data))
-    .catch((e)=>setres({res:"Server is too busy",fl:false}))
+    .then((e:AxiosResponse)=>setres({res:(e.data.res.split("\n")), fl:e.data.fl}))
+    .catch(()=>setres({res:["Server is too busy"],fl:false}))
   }
-
+  console.log(res)
 
   return (
     <div className="editorPage">
@@ -154,7 +154,14 @@ export default function Editor() {
             <p>Result</p>
             <p style={{ cursor: "pointer" }} onClick={() => seth("30px")}>X</p>
           </div>
-          <p className="result" style={{color:res?.fl?"rgb(0, 250, 0)":"rgb(255, 77, 77)"}}>{res?.res}</p>
+          <div className="result">
+            <p style={{color:"white"}}>{">_Console/~"}</p>
+            {
+              res?.res.map((el,i)=>(
+                <p style={{color:res?.fl?"rgb(0, 250, 0)":"rgb(255, 77, 77)"}} key={i}>{i+1}. {el}</p>
+              ))
+            }
+          </div>
         </div>
       </div>
     </div>
