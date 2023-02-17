@@ -20,7 +20,6 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
             admin: roomAdminMap[data.id]
         }))
 
-    console.log(roomAdminMap, data.id);
 
 
 
@@ -34,10 +33,12 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
 }
 
 function leave(socket: Socket, io: Server) {
-    const rooms = Array.from(socket.rooms);
-    rooms.forEach((roomId) => {
-        socket.in(roomId).emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
+    let roomMembers = Array.from(io.sockets.adapter.rooms.get(socket.id) || []);
+
+    roomMembers.forEach(id => {
+        io.to(id).emit("disconnected", { uname: userIdNameMap[socket.id] });
     })
+
     delete userIdNameMap[socket.id];
     socket.leave(userIdRoomMap[socket.id]);
 }
@@ -53,20 +54,24 @@ function readOnly(data: {
     userId: string, readonly: boolean
 },
     socket: Socket, io: Server) {
-    console.log(data)
 }
 
+function clear(id: string, socket: Socket, io: Server) {
+    Array.from(io.sockets.adapter.rooms.get(id) || [])
+        .forEach((socket) => io.to(socket).emit("typed", ""));
+    roomCodeMap[id] = "";
+}
 
 let sc = 0;
 
 export function controler(io: Server) {
 
     io.on("connection", (socket: Socket) => {
-        console.log("socket connected", ++sc, socket.id);
         socket.on("join", (data) => join(data, socket, io));
         socket.on("disconnecting", () => leave(socket, io));
         socket.on("type", (data) => type(data, socket, io))
         socket.on("readonly", (data) => readOnly(data, socket, io))
+        socket.on("clear", (data) => clear(data, socket, io))
     })
 
 }

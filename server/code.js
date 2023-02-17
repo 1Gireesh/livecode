@@ -1,1 +1,1 @@
-for(let i=0; i<n; i++)console.log(i);
+for(let i=0; i<k
