@@ -27,9 +27,9 @@ function join(data, socket, io) {
     }));
 }
 function leave(socket, io) {
-    let roomMembers = Array.from(io.sockets.adapter.rooms.get(socket.id) || []);
-    roomMembers.forEach(id => {
-        io.to(id).emit("disconnected", { uname: userIdNameMap[socket.id] });
+    const rooms = Array.from(socket.rooms);
+    rooms.forEach((roomId) => {
+        socket.in(roomId).emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
     });
     delete userIdNameMap[socket.id];
     socket.leave(userIdRoomMap[socket.id]);

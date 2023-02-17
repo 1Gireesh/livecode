@@ -20,9 +20,6 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
             admin: roomAdminMap[data.id]
         }))
 
-
-
-
     socket.emit("prevcode", roomCodeMap[data.id]);
 
     clients.forEach(({ socketId }) => io.to(socketId)
@@ -33,14 +30,13 @@ function join(data: { id: string, username: string }, socket: Socket, io: Server
 }
 
 function leave(socket: Socket, io: Server) {
-    let roomMembers = Array.from(io.sockets.adapter.rooms.get(socket.id) || []);
-
-    roomMembers.forEach(id => {
-        io.to(id).emit("disconnected", { uname: userIdNameMap[socket.id] });
+    const rooms = Array.from(socket.rooms);
+    rooms.forEach((roomId) => {
+        socket.in(roomId).emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
     })
-
     delete userIdNameMap[socket.id];
     socket.leave(userIdRoomMap[socket.id]);
+
 }
 
 function type(data: { id: string, username: string, code: string }, socket: Socket, io: Server) {
