@@ -36,8 +36,9 @@ export const controler = async (
     );
   });
 
-  socketRef.current.on("nowrite", (readOnly) => {
-    if (readOnly) setRead(true);
+  socketRef.current.on("nowrite", (readOnly, uname) => {
+    // console.log(uname,readOnly)
+    if (readOnly && uname === username) setRead(readOnly);
     else toast("only admin can change read and write access");
   });
 

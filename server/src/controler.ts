@@ -53,7 +53,6 @@ function type(
 ) {
   roomCodeMap[data.id] = data.code;
   Array.from(io.sockets.adapter.rooms.get(data.id) || []).forEach((socket) => {
-    console.log(socket);
     io.to(socket).emit("typed", { ...data });
   });
 }
@@ -68,12 +67,13 @@ function readOnly(
   socket: Socket,
   io: Server
 ) {
+  console.log(userIdNameMap[data.userId], data.userId);
   Array.from(io.sockets.adapter.rooms.get(data.room) || []).forEach(
     (socket) => {
-      if (socket == data.socketId) {
+      if (socket == data.userId) {
         if (roomAdminMap[data.room] == data.username)
-          io.to(socket).emit("nowrite", true, data.username);
-        else io.to(socket).emit("nowrite", false,data.username);
+          io.to(socket).emit("nowrite", true, userIdNameMap[socket]);
+        else io.to(socket).emit("nowrite", false, userIdNameMap[socket]);
       }
     }
   );
@@ -82,7 +82,6 @@ function readOnly(
 function clear(id: string, socket: Socket, io: Server) {
   Array.from(io.sockets.adapter.rooms.get(id) || []).forEach((socket) => {
     io.to(socket).emit("typed", "");
-    console.log(id, roomCodeMap[id]);
   });
   roomCodeMap[id] = "";
 }

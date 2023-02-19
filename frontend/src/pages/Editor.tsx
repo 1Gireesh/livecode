@@ -9,8 +9,8 @@ import axios, { AxiosResponse } from 'axios';
 import { controler } from '../clientControler';
 
 export type socketType = (Socket<DefaultEventsMap, DefaultEventsMap>) | null;
-export type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
-export type clientType = Array<{ username: string, id: string, admin: string }>
+export type clientType = Array<{ username: string, socketId: string, admin: string }>
+export type joined = { socketId: string, username: string, clients: clientType, code: string }
 
 export default function Editor() {
 
@@ -26,10 +26,10 @@ export default function Editor() {
 
   function readonly(userId: string, write: boolean) {
     let admin = clients.find((client) => client.username === username)
-    console.log(admin)
-    socketRef.current?.emit("readonly", { ...admin, room: id })
+    // console.log(userId)
+    socketRef.current?.emit("readonly", { ...admin, room: id, userId })
   }
-
+  console.log(clients)
 
 
   useEffect(() => {
@@ -73,10 +73,12 @@ export default function Editor() {
                   <p>{e.username}</p>
                   <div>
                     <p>{e.admin === e.username ? "Admin" : "User"}</p>
-                    <img alt="a" src={readOnly ? "https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png" :
-                      "https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png"
-                    }
-                      onClick={() => readonly(e.id, true)}
+                    <img alt="a" src={readOnly && e.username === username ? "https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png" :
+                      "https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png"}
+                      onClick={() => {
+                        console.log(e)
+                        readonly(e.socketId, true)
+                      }}
                     />
                   </div>
                 </div>
