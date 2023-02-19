@@ -12,39 +12,50 @@ function join(data, socket, io) {
     if (!roomAdminMap[data.id]) {
         roomAdminMap[data.id] = data.username;
     }
-    let clients = Array
-        .from(io.sockets.adapter.rooms.get(data.id) || [])
-        .map((socketId, i) => ({
+    let clients = Array.from(io.sockets.adapter.rooms.get(data.id) || []).map((socketId, i) => ({
         socketId,
         username: userIdNameMap[socketId],
-        admin: roomAdminMap[data.id]
+        admin: roomAdminMap[data.id],
     }));
     socket.emit("prevcode", roomCodeMap[data.id]);
-    clients.forEach(({ socketId }) => io.to(socketId)
-        .emit("joined", {
-        socketId, username: data.username, clients,
-        admin: userIdNameMap[roomAdminMap[data.id]]
+    clients.forEach(({ socketId }) => io.to(socketId).emit("joined", {
+        socketId,
+        username: data.username,
+        clients,
+        admin: userIdNameMap[roomAdminMap[data.id]],
     }));
 }
 function leave(socket, io) {
     const rooms = Array.from(socket.rooms);
     rooms.forEach((roomId) => {
-        socket.in(roomId).emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
+        socket
+            .in(roomId)
+            .emit("disconnected", { id: socket.id, uname: userIdNameMap[socket.id] });
     });
     delete userIdNameMap[socket.id];
     socket.leave(userIdRoomMap[socket.id]);
 }
 function type(data, socket, io) {
     roomCodeMap[data.id] = data.code;
-    Array.from(io.sockets.adapter.rooms.get(data.id) || [])
-        .forEach((socket) => io.to(socket).emit("typed", Object.assign({}, data)));
+    Array.from(io.sockets.adapter.rooms.get(data.id) || []).forEach((socket) => {
+        io.to(socket).emit("typed", Object.assign({}, data));
+    });
 }
 function readOnly(data, socket, io) {
+    console.log(userIdNameMap[data.userId], data.userId);
+    Array.from(io.sockets.adapter.rooms.get(data.room) || []).forEach((socket) => {
+        if (socket == data.userId) {
+            if (roomAdminMap[data.room] == data.username)
+                io.to(socket).emit("nowrite", true, userIdNameMap[socket]);
+            else
+                io.to(socket).emit("nowrite", false, userIdNameMap[socket]);
+        }
+    });
 }
 function clear(id, socket, io) {
-    Array.from(io.sockets.adapter.rooms.get(id) || [])
-        .forEach((socket) => io.to(socket).emit("typed", ""));
-    console.log(id, roomCodeMap[id]);
+    Array.from(io.sockets.adapter.rooms.get(id) || []).forEach((socket) => {
+        io.to(socket).emit("typed", "");
+    });
     roomCodeMap[id] = "";
 }
 let sc = 0;
