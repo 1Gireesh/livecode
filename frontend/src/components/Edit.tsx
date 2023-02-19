@@ -1,13 +1,5 @@
-import { useEffect } from "react"
 
-
-
-const arr = ["let", "var", "break", "function", "class", "const"]
-const arr2 = ["for", "log", "break", "while", "if", "else"]
-const arr3 = ["true", "false", "null", "undefined"]
-
-
-export default function Edit({ code, setCode }:
+export default function Edit({ code, setCode, readonly = false }:
     {
         readonly: boolean,
         code: string,
@@ -20,7 +12,8 @@ export default function Edit({ code, setCode }:
     return (
         <div className='code'>
             <textarea name="" id="" cols={30} rows={30}
-                value={code || ""}
+                readOnly={readonly}
+                value={code === null ? "" : code}
                 onChange={(e) => {
                     setCode(e.target.value)
                 }}

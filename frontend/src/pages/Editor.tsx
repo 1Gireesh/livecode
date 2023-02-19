@@ -1,76 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom';
-import { initSocket } from '../socket';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Socket } from 'socket.io-client';
 import Edit from '../components/Edit';
 import "../style/editor.css"
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import axios, { AxiosResponse } from 'axios';
+import { controler } from '../clientControler';
 
-
-type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
+export type socketType = (Socket<DefaultEventsMap, DefaultEventsMap>) | null;
+export type joined = { socketId: string, username: string, clients: Array<{ username: string, id: string, admin: string }>, code: string }
+export type clientType = Array<{ username: string, id: string, admin: string }>
 
 export default function Editor() {
+
   let [h, seth] = useState("5vh");
   const [theme, settheme] = useState("material")
   const [res, setres] = useState<{ res: [string], fl: boolean }>()
-
-
   let location = useLocation();
   let { username = "chupaRustam", id = "dsfajkfdsh" } = location.state;
-
-  let socketRef = useRef<(Socket<DefaultEventsMap, DefaultEventsMap>) | null>(null);
+  let socketRef = useRef<socketType>(null);
+  let [readOnly, setRead] = useState(false);
+  const [clients, setClient] = useState<clientType>([]);
+  const [code, setCode] = useState(`@`);
 
   function readonly(userId: string, write: boolean) {
     let admin = clients.find((client) => client.username === username)
-    socketRef.current?.emit("readonly", {
-      roomId: id, adminId: admin?.id,
-      userId, readonly: write
-    })
+    console.log(admin)
+    socketRef.current?.emit("readonly", { ...admin, room: id })
   }
 
-  let [readOnly, setRead] = useState(false);
-  const [clients, setClient] = useState<Array<{ username: string, id: string, admin: string }>>([]);
-  const [code, setCode] = useState(`@`);
 
-  // console.log(clients)
 
   useEffect(() => {
-
-    (async () => {
-      socketRef.current = await initSocket();
-      // socketRef.current.on("connect_failed", (e) => { alert(e); })
-      socketRef.current.emit("join", { id, username });
-      socketRef.current
-        .on("joined", (({ socketId, username: uname, clients, code }: joined) => {
-          setClient(clients);
-          setCode(code);
-          if (username !== uname) {
-            toast((uname + " joined"), {
-              icon: "😉"
-            });
-          }
-        }))
-
-      socketRef.current.on("disconnected", ({ uname }: { uname: string }) => {
-        toast((uname + " disconnected"), {
-          icon: "☹️"
-        });
-        setClient((clients) => clients.filter((client) => client.username !== uname));
-      })
-
-      socketRef.current.on("dontwrite", (readOnly: boolean) => { setRead(readOnly) });
-
-      socketRef.current.on("prevcode", (code) => setCode(code));
-      socketRef.current.on("typed", ({ code, uname }) => {
-        console.log(username,code)
-          if (username !== uname)
-            setCode(code);
-      });
-
-    })();
+    controler(socketRef, id, username, setClient, clients, setCode, setRead);
   }, []);
+
 
   function copyidbtn() {
     navigator.clipboard.writeText(id);
@@ -78,7 +43,6 @@ export default function Editor() {
 
   useEffect(() => {
     if (code !== `@`) socketRef.current?.emit("type", { id, username, code });
-    console.log(code)
   }, [code])
 
   function getresult() {
@@ -96,11 +60,7 @@ export default function Editor() {
           <h1>LIVECODE</h1>
         </div>
 
-        <button className='btn btn-3'
-          onClick={() => {
-            socketRef.current?.emit("clear", id)
-          }}
-        >clear</button>
+
 
         <div className="editorUsers">
 
@@ -108,13 +68,14 @@ export default function Editor() {
           {
             clients?.map((e, i) => (
               <div className="user" key={i}>
-                {/* https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png */}
                 <img alt="a" src="https://i.ibb.co/M2Gd2pD/icons8-cat-profile-100.png" />
                 <div>
                   <p>{e.username}</p>
                   <div>
                     <p>{e.admin === e.username ? "Admin" : "User"}</p>
-                    <img alt="a" src="https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png"
+                    <img alt="a" src={readOnly ? "https://i.ibb.co/qN9CXWn/icons8-no-edit-60.png" :
+                      "https://i.ibb.co/7Cw1f4y/icons8-pencil-60.png"
+                    }
                       onClick={() => readonly(e.id, true)}
                     />
                   </div>
@@ -134,6 +95,7 @@ export default function Editor() {
       <div className="editorbody">
         <div className="editorbody_top">
           <p>Room Id: {id}</p>
+          <p>username: {username}</p>
           <div>
             <label htmlFor="language">Language</label>
             <select name="language" id="language">
